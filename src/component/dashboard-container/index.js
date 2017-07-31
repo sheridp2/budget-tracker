@@ -1,12 +1,19 @@
 import React from 'react';
 import Navbar from '../navbar';
 import ExpenseForm from '../expense-form';
-import ExpenseList from '../expense-list'
+import ExpenseList from '../expense-list';
+import Modal from '../modal';
 import uuid from 'uuid';
+
+let renderIf = (test, component) => test ? component : undefined
 
 class AboutContainer extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      showErrors: true,
+    }
 
     this.expenseCreate = this.expenseCreate.bind(this);
     this.expenseRemove = this.expenseRemove.bind(this);
@@ -26,48 +33,63 @@ class AboutContainer extends React.Component {
     }));
   }
 
-  expenseRemove(expense){
-    let {app} = this.props;
+  expenseRemove(expense) {
+    let { app } = this.props;
     app.setState(prevState => ({
-      expenses: prevState.expenses.filter((item)=>{
-        return item.id !== expense.id
-      })
-    }))
+      expenses: prevState.expenses.filter(item => {
+        return item.id !== expense.id;
+      }),
+    }));
   }
 
-  expenseUpdate(expense){
-    let {app} = this.props;
+  expenseUpdate(expense) {
+    let { app } = this.props;
     app.setState(prevState => ({
-      expenses: prevState.expenses.map((item)=>{
-        return item.id == expense.id ? expense : item
-      })
-    }))
+      expenses: prevState.expenses.map(item => {
+        return item.id == expense.id ? expense : item;
+      }),
+    }));
   }
 
   //render
   render() {
-    let {app} = this.props
+    let { app } = this.props;
 
-    let totalSpent = app.state.expenses.reduce((p, c)=>{
-      return p + c.price
-    }, 0)
+    let totalSpent = app.state.expenses.reduce((p, c) => {
+      return p + c.price;
+    }, 0);
 
-    let remainingBudget= app.state.total - totalSpent
+    let remainingBudget = app.state.total - totalSpent;
     return (
-      <div className='dashboard-container'>
+      <div className="dashboard-container">
         <Navbar />
-        <p> total budget: {app.state.total}</p>
-        <p>total spent: {totalSpent}</p>
-        <p> remaining budget: {remainingBudget}</p>
+        <p>
+          total budget: {app.state.total}
+        </p>
+        <p>
+          total spent: {totalSpent}
+        </p>
+        <p>
+          remaining budget: {remainingBudget}
+        </p>
         <ExpenseForm
           handleSubmit={this.expenseCreate}
-          submitTitle='add expense'/>
-        
+          submitTitle="add expense"
+        />
+
         <ExpenseList
           expenseRemove={this.expenseRemove}
           expenseUpdate={this.expenseUpdate}
-          expenses={app.state.expenses} />
-      </div>
+          expenses={app.state.expenses}
+        />
+      {renderIf(remainingBudget < 0 && this.state.showErrors,
+      <Modal close={() => this.setState({showErrors: false})}>
+        <p>You have no money</p>
+        <p>Current balnace {remainingBudget}</p>
+      </Modal>
+    )}
+
+    </div>
     );
   }
 }

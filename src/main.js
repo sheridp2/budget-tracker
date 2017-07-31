@@ -1,4 +1,4 @@
-import '../style/main.scss';
+import './style/main.scss';
 
 //npm modules
 import React from 'react';
